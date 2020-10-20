@@ -1,12 +1,21 @@
 # axios 源码阅读
 
-整体流程
+### Axios 是一个基于 Promise 的 HTTP 客户端，拥有以下特性：
+
+- 支持 Promise API；
+- 能够拦截请求和响应；
+- 能够转换请求和响应数据；
+- 客户端支持防御 CSRF 攻击；
+- 同时支持浏览器和 Node.js 环境；
+- 能够取消请求及自动转换 JSON 数据。
+
+### 整体流程
 
 ![axios流程](/imgs/img1.png)
 
 **源码阅读注释在各个源码文件中**
 
-**问题：**
+### 问题：
 
 1.为什么 axios 既可以当函数调用 axios({})，也可以当对象使用 axios.get
 
@@ -14,11 +23,11 @@ axios 本质是一个函数，所以可以当函数使用，而 axios.get 这些
 
 2.axios 的取消功能
 
-**axios 提供两种取消请求方式**
+### axios 提供两种取消请求方式
 
--   通过 axios.CancelToken.source 生成取消令牌 token 和取消方法 cancel
+- 通过 axios.CancelToken.source 生成取消令牌 token 和取消方法 cancel
 
-```
+```js
 const CancelToken = axios.CancelToken;
 const source = CancelToken.source();
 
@@ -42,7 +51,7 @@ axios.post('/user/12345', {
 source.cancel('Operation canceled by the user.');
 ```
 
--   通过 axios.CancelToken 构造函数生成取消函数
+- 通过 axios.CancelToken 构造函数生成取消函数
 
 ```
 const CancelToken = axios.CancelToken;
@@ -58,11 +67,11 @@ axios.get('/user/12345', {
 cancel();
 ```
 
-**axios 取消请求原理**
+### axios 取消请求原理
 
 通过传递 config 配置 cancelToken 的形式，如果有 cancelToken，在 promise 链式调用的 dispatchRequest 抛出错误，在 adapter 中的 xhr 的 request.abort() 取消请求，使 promise 走向 rejected，被用户捕获取消信息
 
-```
+```js
 // dispatchRequest.js
 
 function throwIfCancellationRequested(config) {
